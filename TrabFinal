@@ -1,0 +1,460 @@
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <iomanip>
+
+using namespace std;
+
+double stn(string num, double &x){  //função global que converte uma string para um numero;
+stringstream conv(num);
+	if(!(conv >> x ))
+	x = 0;
+	return x;
+}
+
+string nts( double a, string &b){  //função global que converte um numero para uma string;
+	stringstream conv;
+	conv << a;
+	b = conv.str();
+	return b;
+}
+   
+bool procura(string a, string b){ //função que busca uma palavra em uma linha de string;
+	  	size_t found = a.find(b);
+  	if (found == std::string::npos){
+ 	   	 return false;
+ 	}
+  		else { 
+		 return true;
+	}
+}
+
+void empresas(string empresa){  //serve para atualizar e inicializar a lista de empresas cadastradas no programa;
+	fstream file("Empresas",ios::app);
+	file << empresa << endl;
+	file.close();
+	fstream outfile(empresa.c_str(),ios::app);
+	outfile <<"";
+	outfile.close();
+}
+
+bool existe(string procura){ //verifica se a empresa existe;
+	vector<string> all;
+	vector<string>::iterator ix;
+	string vazia;
+	ifstream emp("Empresas");
+	while(!emp.eof()){
+		getline(emp,vazia);
+		all.push_back(vazia);
+	}
+	for(ix=all.begin();ix!=all.end();ix++){
+		if(*ix == procura){
+			return true;
+		}
+	}
+	return false;
+}
+void lista(){
+	vector<string> all;
+	vector<string>::iterator ix;
+	string vazia;
+	ifstream emp("Empresas");
+	while(!emp.eof()){
+		getline(emp,vazia);
+		all.push_back(vazia);
+	}
+	for(ix=all.begin();ix!=all.end();ix++){
+		cout <<*ix<<endl;
+	}
+	
+}
+	
+class usuario{
+	public:
+	string nome,id,setor,idade,avalia;
+	void add( string empresa,string nome, string setor, string idade, string id, string nota){
+		double k;
+		fstream outfile (empresa.c_str(),ios::app);  //Criamos o arquivo com o nome da empresa, assim cada empresa tera seus arquivos com cada funcionario;
+			outfile << "- " <<id << " |"<< "Nome: " << nome << " |Setor: " << setor << "|Idade: " << idade << endl;
+			outfile << nota << endl;
+			outfile.close();
+	}
+	
+	void identifica(string empresa, string nome,string &id){
+		int i; 
+		i = (empresa.size() + empresa[0] + nome.size()) *(nome[nome.size()-1] + nome[nome.size()-2]);
+		while(i>999){
+			i = i-nome[1];
+		}
+		while(i<100){
+			i = i+nome[1];
+		}
+		nts(i,id);
+	}
+	
+	void excluir(string empresa, string parametro){
+		vector <string> ex;
+		vector <string>::iterator it;
+		string aux;
+		ifstream file(empresa.c_str());
+		while(!file.eof()){
+			getline(file,aux);
+			ex.push_back(aux);
+		}
+		file.close();
+		for(int i=0;i<ex.size();i++){
+			if(procura(ex[i], parametro)==true){
+				ex[i] = "***DELETADO***";
+				ex[i+1] = "**NOTA OFF***";
+			}
+		}
+		ofstream newfile(empresa.c_str());
+		for(it = ex.begin();it!=ex.end();it++){
+			newfile << *it << endl;
+			
+		}
+	}
+	bool valido(string empresa, string nome){
+		vector <string> ex;
+		vector <string>::iterator it;
+		string aux;
+		ifstream file(empresa.c_str());
+		while(!file.eof()){
+			getline(file,aux);
+			ex.push_back(aux);
+		}
+		file.close();
+		for(it = ex.begin();it!=ex.end();it++){
+			if(procura(*it, nome)==true){
+				return true;
+			}
+		}
+		return false;
+	}
+	double get_nota(string nome, string empresa){
+		vector <string> ex;
+		vector <string>::iterator it;
+		string aux;
+		string n = "";
+		double nota;
+		ifstream file(empresa.c_str());
+		while(!file.eof()){
+			getline(file,aux);
+			ex.push_back(aux);
+		}
+		for(int i=0;i<ex.size();i++){
+			if(procura(ex[i],nome)==true){
+				stn(ex[i+1],nota);
+			}
+		}
+		return nota;
+	} 
+	void set_nota(string empresa, string nome, string novanota){
+		vector <string> ex;
+		vector <string>::iterator it;
+		string aux, velhanota;
+		usuario c;
+		double velha;
+		double nova;
+		ifstream file(empresa.c_str());
+		while(!file.eof()){
+			getline(file,aux);
+			ex.push_back(aux);
+		}
+		file.close();
+		stn(novanota,nova);
+		velha = c.get_nota(nome,empresa);
+		nova = ((nova+velha)/2);
+		nts(nova,novanota);
+		nts(velha,velhanota);
+		cout << "VELHA: " << velhanota << "|NOVA: " << novanota;
+		for(int i =0;i<ex.size();i++){
+			if(procura(ex[i], nome)==true){
+				ex[i+1] = novanota;
+			}
+		}
+		ofstream newfile(empresa.c_str());
+		for(it = ex.begin();it!=ex.end();it++){
+			newfile << *it << endl;
+		}
+		newfile.close();
+	}
+	
+	void set_avalia(string avaliacao, string empresa, string nome){
+		string nova = "" + empresa + "_AV" ;
+		usuario b;
+		string id;
+		b.identifica(empresa,nome, id);
+		fstream file(nova.c_str(), ios::app);
+		file  << id << " |Avaliação -> " << avaliacao<< endl;
+		file.close();
+		
+	}
+	void search(string nome, string empresa){
+		vector <string> ex, x;
+		vector <string>::iterator it;
+		usuario c;
+		string aux;
+		string id;
+		string base = "" + empresa + "_AV";
+		ifstream file(empresa.c_str());
+		while(!file.eof()){
+			getline(file,aux);
+			ex.push_back(aux);
+		}
+		file.close();
+		for(int i = 0;i<ex.size();i++){
+			if(procura(ex[i],nome)==true){
+				cout << ex[i]<< endl;
+				cout << "Nota: " <<ex[i+1] << endl;
+			}
+		}
+		c.identifica(empresa,nome,id);
+		cout << "Agora, segue todas as reclamações desse funcionario" << endl;
+		ifstream file2(base.c_str());
+		while(!file2.eof()){
+			getline(file2,aux);
+			x.push_back(aux);
+		}
+		cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!" << x.size();
+		file2.close();
+		for(it=x.begin();it!=x.end();it++){
+			if(procura(*it,id)==true){
+				cout << *it << endl;
+			}
+		}
+	}	
+	void all(string empresa){
+		vector <string> x;
+		vector <string>::iterator it;
+		string aux;
+		ifstream file(empresa.c_str());
+		while(!file.eof()){
+			getline(file,aux);
+			x.push_back(aux);
+		}
+		file.close();
+		for(it=x.begin();it!=x.end();it++){
+			cout << *it << endl;
+		}
+	}
+	void dg(string empresa, double &m){
+		vector <double> x;
+		vector <string> g;
+		vector <double>::iterator it;
+		string aux; 
+		string b="-";
+		string base ="" + empresa + "_AV";;
+		double a,j;
+		ifstream file(empresa.c_str());
+		while(!file.eof()){
+			getline(file,aux);
+			if(procura(aux,b)==true||aux == ""){
+			}else{
+			stn(aux,a);	
+			x.push_back(a);
+			}
+		}
+		file.close();
+		j = x.size();
+		for(int i=0;i<x.size();i++){
+			m = m + x[i];
+		}
+		m = m/j;
+	}
+	void tg(string empresa, int total, double &m){
+		vector <string> ex, x;
+		vector <string>::iterator it;
+		usuario c;
+		string aux;
+		string base = empresa + "_AV";
+		ifstream file(empresa.c_str());
+		while(!file.eof()){
+			getline(file,aux);
+			ex.push_back(aux);
+		}
+		file.close();
+		ifstream file2(base.c_str());
+		while(!file2.eof()){
+			getline(file2,aux);
+			if(aux==""){
+			}else{
+			x.push_back(aux);
+			}
+		}
+		total = ex.size()-1;
+		total = ex.size()/x.size();
+	}
+};
+
+int main(){
+	usuario a; 
+	int op = 78,sai=0,op2=0,n=0, total;
+	double media, media2;
+	string sen1;
+	string empresa, sel, vazia,novanota;
+	string in = "5,0"; //suporte para inicializar todas as notas quando criado o funcionario;
+	string senha = "admin";
+	vector<string> coletor;
+	vector<string>::iterator ix;
+	/*processos para começar o programa*/
+	fstream emp("Empresas",ios::app);
+	emp << "";
+	emp.close();
+	cout << setprecision(1);
+	cout << fixed;
+	setlocale(LC_ALL,"Portuguese");
+	while(op!=5){
+		cout << "\t\tMenu" << endl;
+		cout << "1 => Avaliar Funcionario." << endl;
+		cout << "2 => Buscar Funcionario." << endl;
+		cout << "3 => Listagem de Funcionarios (Por empresa)." << endl;
+		cout << "4 => Dados Estatisticos." << endl;
+		cout << "5 => Para sair do programa;" << endl;
+		cin >> op;
+		while(op > 5 || op < -1){
+		cout << "Voce digitou um numero que nao esta fora do menu, digite novamente" << endl;
+		cin >> op;
+		}
+		switch(op){
+			case 0:
+			system("cls");
+			cout << "Digite a senha para entrar na area de administrador" << endl;
+			cin >> sen1;
+			while(sen1 != senha){
+				if(sai == 3){
+					return 0;
+				}
+				cout << "Ops! Parece que voce esqueceu a senha, tente navamente, \n mas lembre-se  voce so pode tentar 3 vezes" << endl;
+				cin>> sen1;
+				sai++;
+				
+			}
+				system("cls");
+				cout << "Cadastra emresa?" << endl;
+				cin >> sel;
+				if(sel == "sim"){
+					cout << "Digite o nome da empresa: " << endl;
+					fflush(stdin);
+					getline(cin,empresa);
+					empresas(empresa);
+					break;
+				}else{
+					cout << "Digite o nome da empresa que deseja alterar: " << endl;
+					fflush(stdin);
+					getline(cin,empresa);
+					while(existe(empresa)!=true){
+						cout << "Opa Parece que voce digitou uma empresa fora da lista existente, digite de novo" << endl;
+						fflush(stdin);
+					getline(cin,empresa);
+					}
+				}
+				cout << "BEM VINDO AO PAINEL DE CONTROLE DA " << empresa << endl;
+				cout << "1 <= Adicionar Funcionarios"<< endl;
+				cout << "2 <= Remover Funcionarios" << endl;
+				cout << "3 -> Lista de Funcionarios com media baixa" << endl;
+				cout << "4-> Funcionario do mes." << endl;
+				cin >> op2;
+				switch(op2){
+					case 1:
+						cout << "Bem vindo, primeiramente digite o numero de funcionarios que deseja adicionar: ";
+						cin >> n;
+						for(int i=0;i<n;i++){
+							system("cls");
+							cout << "Nome: ";
+							fflush(stdin);
+							getline(cin,a.nome);
+							cout <<"Idade: ";
+							cin>>a.idade;
+							cout <<"Setor: ";
+							fflush(stdin);
+							getline(cin,a.setor);
+							a.identifica(empresa,a.nome,a.id);
+							a.add(empresa,a.nome,a.setor,a.idade,a.id,in);
+						}
+						break;
+					case 2:
+						cout << "Digite o numero de funcionario que deseja retirar: ";
+						cin >> n;
+						for(int i=0;i<n;i++){
+							system("cls");
+							cout << "Nome: ";
+							fflush(stdin);
+							getline(cin,a.nome);
+							a.excluir(empresa,a.nome);
+						}
+						
+						break;
+					case 3:
+						break;
+					case 4:
+						break;
+				}
+				break;
+			case 1:
+				cout << "Ola, temos cadastrados em nossos bancos as seguintes empresas: " <<endl;
+				lista();
+				cout << "Escolha a que o funcionario que deseja avaliar trabalha" << endl;
+				fflush(stdin);
+				getline(cin,empresa);
+				while(existe(empresa)!=true){
+					cout << "Opa Parece que voce digitou uma empresa fora da lista existente, digite de novo" << endl;
+					fflush(stdin);
+					getline(cin,empresa);
+				}
+				system("cls");
+				cout << "Agora digite o nome do funcionario: ";
+				fflush(stdin);
+				getline(cin,a.nome);
+				while(a.valido(empresa,a.nome)!= true){
+					cout << "Usuario nao encontrado, tente novamente: " << endl;
+					cin>>a.nome;
+				}
+				cout << "Usuario encontrado, digite sua avaliação: " << endl;
+				fflush(stdin);
+				getline(cin,a.avalia);
+				a.set_avalia(a.avalia,empresa,a.nome);
+				system("cls");
+				cout << "Agora avalie o funcionario com uma nota de 0 a 5"<< endl;
+				cin>> novanota;
+				a.set_nota(empresa,a.nome,novanota);
+				break;
+			case 2:
+				cout << "Digite, primeiro o nome da empresa, em seguida o nome do funcionario que deseja porcurar: " << endl;
+				fflush(stdin);
+				getline(cin,empresa);
+				while(existe(empresa)!=true){
+					cout << "Opa Parece que voce digitou uma empresa fora da lista existente, digite de novo" << endl;
+					fflush(stdin);
+					getline(cin,empresa);
+				}
+				fflush(stdin);
+				getline(cin,a.nome);
+				a.search(a.nome,empresa);
+				break;
+			case 3:
+				cout << "Digite o nome da empresa" << endl;
+				cin>> empresa;
+				a.all(empresa);
+				break;
+			case 4:
+				cout << "Digite o nome da empresa que deseja obter informações: ";
+				fflush(stdin);
+				getline(cin,empresa);
+				while(existe(empresa)!=true){
+					cout << "Opa Parece que voce digitou uma empresa fora da lista existente, digite de novo" << endl;
+					fflush(stdin);
+					getline(cin,empresa);
+				}
+				a.dg(empresa, media);
+				a.tg(empresa, total, media2);
+				cout << "O media total de acordo com as notas é de: " << media << endl;
+				cout << "O total de reclamçoes e de : " << total << endl;
+				cout << "O media de reclamaçoes por funcionario é de: " << media2 << endl; 
+				break;
+			case 5:
+				return 0;
+				break;
+		}
