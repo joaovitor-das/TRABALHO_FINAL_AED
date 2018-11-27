@@ -1,9 +1,17 @@
+/*Projeto Final de AED;
+UnB - Univerisdade de Brasilia;
+Professor: Vinicius;
+Alunos: Joao Vitor Silva - 17/01
+Joao Vitor Fonseca de Lima - 17/0014118
+Avaliação de Funcionario
+Ultima modificação: 27/11/2018 - 15:25*/
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
 #include <iomanip>
+#include <cstdio>
 
 using namespace std;
 
@@ -14,14 +22,14 @@ stringstream conv(num);
 	return x;
 }
 
-string nts( double a, string &b){  //função global que converte um numero para uma string;
+string nts( double a, string &b){  			//função global que converte um numero para uma string;
 	stringstream conv;
 	conv << a;
 	b = conv.str();
 	return b;
 }
    
-bool procura(string a, string b){ //função que busca uma palavra em uma linha de string;
+bool procura(string a, string b){ 			//função que busca uma palavra em uma linha de string;
 	  	size_t found = a.find(b);
   	if (found == std::string::npos){
  	   	 return false;
@@ -31,7 +39,7 @@ bool procura(string a, string b){ //função que busca uma palavra em uma linha 
 	}
 }
 
-void empresas(string empresa){  //serve para atualizar e inicializar a lista de empresas cadastradas no programa;
+void empresas(string empresa){  			//serve para atualizar e inicializar a lista de empresas cadastradas no programa;
 	fstream file("Empresas",ios::app);
 	file << empresa << endl;
 	file.close();
@@ -40,7 +48,7 @@ void empresas(string empresa){  //serve para atualizar e inicializar a lista de 
 	outfile.close();
 }
 
-bool existe(string procura){ //verifica se a empresa existe;
+bool existe(string procura){ 				//verifica se a empresa existe;
 	vector<string> all;
 	vector<string>::iterator ix;
 	string vazia;
@@ -56,7 +64,7 @@ bool existe(string procura){ //verifica se a empresa existe;
 	}
 	return false;
 }
-void lista(){
+void lista(){  								// Faz uma lista das empresas existentes, para orientar o usuario na hora de selecionar;
 	vector<string> all;
 	vector<string>::iterator ix;
 	string vazia;
@@ -71,7 +79,7 @@ void lista(){
 	
 }
 	
-class usuario{
+class usuario{         //classe usuario, serve para oriente todo o processo de cadastro de funcionario e suas respectivas 
 	public:
 	string nome,id,setor,idade,avalia;
 	void add( string empresa,string nome, string setor, string idade, string id, string nota){
@@ -82,9 +90,9 @@ class usuario{
 			outfile.close();
 	}
 	
-	void identifica(string empresa, string nome,string &id){
+	void identifica(string empresa, string nome,string &id){  //aqui foi usado o metodo de tabela Hash, para criar um codigo de cada funcionario;
 		int i; 
-		i = (empresa.size() + empresa[0] + nome.size()) *(nome[nome.size()-1] + nome[nome.size()-2]);
+		i = (empresa.size() + empresa[0] + nome.size()) + (nome[nome.size()-1] + nome[nome.size()-2]);
 		while(i>999){
 			i = i-nome[1];
 		}
@@ -93,8 +101,7 @@ class usuario{
 		}
 		nts(i,id);
 	}
-	
-	void excluir(string empresa, string parametro){
+	void excluir(string empresa, string parametro){  //funçao que retira um funcionario da empresa em que o mesmo esta cadastrada;
 		vector <string> ex;
 		vector <string>::iterator it;
 		string aux;
@@ -116,7 +123,7 @@ class usuario{
 			
 		}
 	}
-	bool valido(string empresa, string nome){
+	bool valido(string empresa, string nome){  					//verifica se um funcionario esta validado(cadastrado) na empresa q qual ele pertence;
 		vector <string> ex;
 		vector <string>::iterator it;
 		string aux;
@@ -133,11 +140,10 @@ class usuario{
 		}
 		return false;
 	}
-	double get_nota(string nome, string empresa){
+	double get_nota(string nome, string empresa){ 			 //função que pega a nota do funcionario 
 		vector <string> ex;
 		vector <string>::iterator it;
 		string aux;
-		string n = "";
 		double nota;
 		ifstream file(empresa.c_str());
 		while(!file.eof()){
@@ -151,7 +157,7 @@ class usuario{
 		}
 		return nota;
 	} 
-	void set_nota(string empresa, string nome, string novanota){
+	void set_nota(string empresa, string nome, string novanota){  //funçao que muda a nota do usuario apos o mesmo resceber uma nova nota;
 		vector <string> ex;
 		vector <string>::iterator it;
 		string aux, velhanota;
@@ -182,7 +188,7 @@ class usuario{
 		newfile.close();
 	}
 	
-	void set_avalia(string avaliacao, string empresa, string nome){
+	void set_avalia(string avaliacao, string empresa, string nome){  //função usada para a avaliação do funcionario;
 		string nova = "" + empresa + "_AV" ;
 		usuario b;
 		string id;
@@ -192,10 +198,12 @@ class usuario{
 		file.close();
 		
 	}
-	void search(string nome, string empresa){
+	void search(string nome, string empresa){  //aqui se busca a avaliação do funcionario, alem de sua respectiva nota;
 		vector <string> ex, x;
+		vector <string> plus;
 		vector <string>::iterator it;
 		usuario c;
+		int k;
 		string aux;
 		string id;
 		string base = "" + empresa + "_AV";
@@ -209,24 +217,33 @@ class usuario{
 			if(procura(ex[i],nome)==true){
 				cout << ex[i]<< endl;
 				cout << "Nota: " <<ex[i+1] << endl;
+				k++;
 			}
 		}
+		if(k>1){
+			cout << "Indentificamos que existem mais de um funcionario com esse nome, selecione o ID do funcionario correnpondente: " << endl;
+			cin>> id;
+		}else if(k == 1){
 		c.identifica(empresa,nome,id);
+		}
 		cout << "Agora, segue todas as reclamações desse funcionario" << endl;
 		ifstream file2(base.c_str());
-		while(!file2.eof()){
-			getline(file2,aux);
-			x.push_back(aux);
-		}
-		cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!" << x.size();
-		file2.close();
-		for(it=x.begin();it!=x.end();it++){
-			if(procura(*it,id)==true){
-				cout << *it << endl;
+		if(file2.is_open()==true){
+			while(!file2.eof()){
+				getline(file2,aux);
+				x.push_back(aux);
 			}
+			file2.close();
+			for(it=x.begin();it!=x.end();it++){
+				if(procura(*it,id)==true){
+					cout << *it << endl;
+				}
+			}
+		}else{
+			cout << "Nao há avaliações dessa empresa ainda" << endl;
 		}
 	}	
-	void all(string empresa){
+	void all(string empresa){ //lista de todos os funcionario cadastrados em uma x empresa;
 		vector <string> x;
 		vector <string>::iterator it;
 		string aux;
@@ -240,7 +257,7 @@ class usuario{
 			cout << *it << endl;
 		}
 	}
-	void dg(string empresa, double &m){
+	void dg(string empresa, double &m){ //calcula a media geral de uma x empresa;
 		vector <double> x;
 		vector <string> g;
 		vector <double>::iterator it;
@@ -264,28 +281,27 @@ class usuario{
 		}
 		m = m/j;
 	}
-	void tg(string empresa, int total, double &m){
-		vector <string> ex, x;
-		vector <string>::iterator it;
-		usuario c;
+	void bbe(string empresa){
+		remove(empresa.c_str());
+		string base = ""+empresa+"_AV";
+		remove(base.c_str());
+		vector <string> busca;
+		vector <string>::iterator b;
 		string aux;
-		string base = empresa + "_AV";
-		ifstream file(empresa.c_str());
+		ifstream file("Empresas");
 		while(!file.eof()){
 			getline(file,aux);
-			ex.push_back(aux);
-		}
-		file.close();
-		ifstream file2(base.c_str());
-		while(!file2.eof()){
-			getline(file2,aux);
-			if(aux==""){
+			if(procura(aux,empresa)==true){
 			}else{
-			x.push_back(aux);
+				busca.push_back(aux);
 			}
 		}
-		total = ex.size()-1;
-		total = ex.size()/x.size();
+		file.close();
+		ofstream file2("Empresas");
+		for(b=busca.begin();b!=busca.end();b++){
+			file2 << *b << endl;
+		}
+		file2.close();
 	}
 };
 
@@ -295,7 +311,7 @@ int main(){
 	double media, media2;
 	string sen1;
 	string empresa, sel, vazia,novanota;
-	string in = "5,0"; //suporte para inicializar todas as notas quando criado o funcionario;
+	string in = "5.0"; //suporte para inicializar todas as notas quando criado o funcionario;
 	string senha = "admin";
 	vector<string> coletor;
 	vector<string>::iterator ix;
@@ -333,15 +349,14 @@ int main(){
 				
 			}
 				system("cls");
-				cout << "Cadastra emresa?" << endl;
+				cout << "Cadastra empresa?(digite apensar sim ou nao)" << endl;
 				cin >> sel;
 				if(sel == "sim"){
 					cout << "Digite o nome da empresa: " << endl;
 					fflush(stdin);
 					getline(cin,empresa);
 					empresas(empresa);
-					break;
-				}else{
+				}else if(sel=="nao"){
 					cout << "Digite o nome da empresa que deseja alterar: " << endl;
 					fflush(stdin);
 					getline(cin,empresa);
@@ -352,10 +367,11 @@ int main(){
 					}
 				}
 				cout << "BEM VINDO AO PAINEL DE CONTROLE DA " << empresa << endl;
-				cout << "1 <= Adicionar Funcionarios"<< endl;
-				cout << "2 <= Remover Funcionarios" << endl;
-				cout << "3 -> Lista de Funcionarios com media baixa" << endl;
-				cout << "4-> Funcionario do mes." << endl;
+				cout << "1-> Adicionar Funcionarios"<< endl;
+				cout << "2-> Remover Funcionarios" << endl;
+				cout << "3-> Lista de Funcionarios com media baixa" << endl;
+				cout << "4-> Funcionario do mes" << endl;
+				cout << "5-> Excluir empresa" << endl;
 				cin >> op2;
 				switch(op2){
 					case 1:
@@ -391,6 +407,9 @@ int main(){
 						break;
 					case 4:
 						break;
+					case 5:
+						a.bbe(empresa);
+						break;
 				}
 				break;
 			case 1:
@@ -422,6 +441,8 @@ int main(){
 				a.set_nota(empresa,a.nome,novanota);
 				break;
 			case 2:
+				cout << "Ola, temos cadastrados em nossos bancos as seguintes empresas: " <<endl;
+				lista();
 				cout << "Digite, primeiro o nome da empresa, em seguida o nome do funcionario que deseja porcurar: " << endl;
 				fflush(stdin);
 				getline(cin,empresa);
@@ -435,11 +456,15 @@ int main(){
 				a.search(a.nome,empresa);
 				break;
 			case 3:
+				cout << "Ola, temos cadastrados em nossos bancos as seguintes empresas: " <<endl;
+				lista();
 				cout << "Digite o nome da empresa" << endl;
 				cin>> empresa;
 				a.all(empresa);
 				break;
 			case 4:
+				cout << "Ola, temos cadastrados em nossos bancos as seguintes empresas: " <<endl;
+				lista();
 				cout << "Digite o nome da empresa que deseja obter informações: ";
 				fflush(stdin);
 				getline(cin,empresa);
@@ -449,7 +474,6 @@ int main(){
 					getline(cin,empresa);
 				}
 				a.dg(empresa, media);
-				a.tg(empresa, total, media2);
 				cout << "O media total de acordo com as notas é de: " << media << endl;
 				cout << "O total de reclamçoes e de : " << total << endl;
 				cout << "O media de reclamaçoes por funcionario é de: " << media2 << endl; 
@@ -458,3 +482,5 @@ int main(){
 				return 0;
 				break;
 		}
+	}
+}
