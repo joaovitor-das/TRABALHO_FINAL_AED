@@ -1,10 +1,11 @@
+
 /*Projeto Final de AED;
 UnB - Univerisdade de Brasilia;
 Professor: Vinicius;
-Alunos: Joao Vitor Silva - 17/01
+Alunos: Joao Vitor da Silva - 17/0106501
 Joao Vitor Fonseca de Lima - 17/0014118
 Avaliação de Funcionario
-Ultima modificação: 27/11/2018 - 15:25*/
+Ultima modificação: 28/11/2018 - 10:38*/
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -78,6 +79,114 @@ void lista(){  								// Faz uma lista das empresas existentes, para orientar o
 	}
 	
 }
+void insertion_sort2(std::vector<double> &vetor) { 	// algoritmo de ordenação em ordem crescente
+
+    for (int i = 1; i < vetor.size(); i++) {
+		double escolhido = vetor[i];
+		double j = i - 1;
+		
+		while ((j >= 0) && (vetor[j] < escolhido)) {
+			vetor[j + 1] = vetor[j];
+			j--;
+		}
+		
+		vetor[j + 1] = escolhido;
+	}
+}
+void insertion_sort1(std::vector<double> &vetor) {	// algoritmo de ordenação em ordem decrescente
+
+    for (int i = 1; i < vetor.size(); i++) {
+		double escolhido = vetor[i];
+		double j = i - 1;
+		
+		while ((j >= 0) && (vetor[j] > escolhido)) {
+			vetor[j + 1] = vetor[j];
+			j--;
+		}
+		
+		vetor[j + 1] = escolhido;
+	}
+}
+void rehabilitacao(string empresa){
+	vector<string> dados;
+	vector<double> notas;
+	vector<double>::iterator it;
+	vector<string> dadosaux;
+	vector<string>::iterator ix;
+	string aux;
+	double a;
+	a = 0.0;
+	ifstream file(empresa.c_str());
+	while(!file.eof()){
+		getline(file,aux);
+		dados.push_back(aux);
+}	
+	for (ix=dados.begin();ix!=dados.end();ix++){
+		if (procura(*ix, "-")==true || *ix==""){
+		}else{
+			aux = *ix;
+			stn(aux, a);
+			if (a<=3.5){
+				notas.push_back(a);
+			}
+	}
+}	
+	insertion_sort1(notas);
+	cout << "Lista de Reabilitação: " << endl;
+	for(it=notas.begin();it!=notas.end();it++){
+		a=*it;
+		nts(a, aux);
+			for(ix=dados.begin();ix!=dados.end();ix++){
+				if(procura(*ix, aux)==true){
+					ix--;
+					cout << *ix << endl;
+					ix++;
+					cout << *ix << endl;
+				}
+			}
+	}
+}
+void funcionario_do_mes(string empresa){
+	vector<string> dados;
+	vector<double> notas;
+	vector<double>::iterator it;
+	vector<string> dadosaux;
+	vector<string>::iterator ix;
+	string aux;
+	double a;
+	a = 0.0;
+	ifstream file(empresa.c_str());
+	while(!file.eof()){
+		getline(file,aux);
+		dados.push_back(aux);
+}	
+	for (ix=dados.begin();ix!=dados.end();ix++){
+		if (procura(*ix, "-")==true || *ix==""){
+		}else{
+			aux = *ix;
+			stn(aux, a);
+			if (a>=4.5){
+				notas.push_back(a);
+			}
+	}
+}	
+	insertion_sort2(notas);
+	cout << "Lista de Candidatos a Funcionario do Mes: " << endl;
+	for(it=notas.begin();it!=notas.end();it++){
+		a=*it;
+		nts(a, aux);
+			for(ix=dados.begin();ix!=dados.end();ix++){
+				if(procura(*ix, aux)==true){
+					ix--;
+					cout << *ix << endl;
+					ix++;
+					cout << *ix << endl;
+				}
+			}
+	}
+}
+	
+
 	
 class usuario{         //classe usuario, serve para oriente todo o processo de cadastro de funcionario e suas respectivas 
 	public:
@@ -101,7 +210,7 @@ class usuario{         //classe usuario, serve para oriente todo o processo de c
 		}
 		nts(i,id);
 	}
-	void excluir(string empresa, string parametro){  //funçao que retira um funcionario da empresa em que o mesmo esta cadastrada;
+	void excluir(string empresa, string parametro){  //função que retira um funcionario da empresa em que o mesmo esta cadastrada;
 		vector <string> ex;
 		vector <string>::iterator it;
 		string aux;
@@ -186,8 +295,8 @@ class usuario{         //classe usuario, serve para oriente todo o processo de c
 			newfile << *it << endl;
 		}
 		newfile.close();
+		
 	}
-	
 	void set_avalia(string avaliacao, string empresa, string nome){  //função usada para a avaliação do funcionario;
 		string nova = "" + empresa + "_AV" ;
 		usuario b;
@@ -370,7 +479,7 @@ int main(){
 				cout << "1-> Adicionar Funcionarios"<< endl;
 				cout << "2-> Remover Funcionarios" << endl;
 				cout << "3-> Lista de Funcionarios com media baixa" << endl;
-				cout << "4-> Funcionario do mes" << endl;
+				cout << "4-> Candidatos a Funcionario do mes" << endl;
 				cout << "5-> Excluir empresa" << endl;
 				cin >> op2;
 				switch(op2){
@@ -404,8 +513,10 @@ int main(){
 						
 						break;
 					case 3:
+						rehabilitacao(empresa);
 						break;
 					case 4:
+						funcionario_do_mes(empresa);
 						break;
 					case 5:
 						a.bbe(empresa);
@@ -459,7 +570,8 @@ int main(){
 				cout << "Ola, temos cadastrados em nossos bancos as seguintes empresas: " <<endl;
 				lista();
 				cout << "Digite o nome da empresa" << endl;
-				cin>> empresa;
+				fflush(stdin);
+				getline(cin,empresa);
 				a.all(empresa);
 				break;
 			case 4:
