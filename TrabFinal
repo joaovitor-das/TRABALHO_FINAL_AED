@@ -1,11 +1,10 @@
-
 /*Projeto Final de AED;
 UnB - Univerisdade de Brasilia;
 Professor: Vinicius;
 Alunos: Joao Vitor da Silva - 17/0106501
 Joao Vitor Fonseca de Lima - 17/0014118
 Avaliação de Funcionario
-Ultima modificação: 28/11/2018 - 10:38*/
+Ultima modificação: 28/11/2018 - 15:22*/
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -105,6 +104,55 @@ void insertion_sort1(std::vector<double> &vetor) {	// algoritmo de ordenação e
 		}
 		
 		vetor[j + 1] = escolhido;
+	}
+}
+	bool id_valida(string empresa, string id){
+		vector<string> dados;
+		vector<string>::iterator it;
+		string aux;
+		ifstream file(empresa.c_str());
+		while(!file.eof()){
+			getline (file, aux);
+			dados.push_back(aux);
+		}
+		for (it=dados.begin();it!=dados.end();it++){
+			if(procura(*it, id)== true){
+				return true;
+			}
+		}
+		return false;
+	}
+	void procuraid(string empresa, string id){
+			vector<string> dados;
+		vector<string>::iterator it;
+		vector<string> x;
+		string aux, aux1;
+		string base = "" + empresa + "_AV";
+		ifstream file(empresa.c_str());
+		while(!file.eof()){
+			getline (file, aux);
+			dados.push_back(aux);
+		}
+		for (it=dados.begin();it!=dados.end();it++){
+			if(procura(*it, id)== true){
+				cout << *it << endl;
+				it++;
+				cout << "NOTA: "<< *it << endl;
+			}
+		}
+		cout << "Agora, segue todos os comentarios a respeito desse funcionario" << endl;
+		ifstream file2(base.c_str());
+		if(file2.is_open()==true){
+			while(!file2.eof()){
+				getline(file2,aux1);
+				x.push_back(aux1);
+			}
+			file2.close();
+			for(it=x.begin();it!=x.end();it++){
+				if(procura(*it,id)==true){
+					cout << *it << endl;
+				}
+			}
 	}
 }
 void rehabilitacao(string empresa){
@@ -222,8 +270,8 @@ class usuario{         //classe usuario, serve para oriente todo o processo de c
 		file.close();
 		for(int i=0;i<ex.size();i++){
 			if(procura(ex[i], parametro)==true){
-				ex[i] = "***DELETADO***";
-				ex[i+1] = "**NOTA OFF***";
+				ex[i] = "";
+				ex[i+1] = "";
 			}
 		}
 		ofstream newfile(empresa.c_str());
@@ -266,6 +314,23 @@ class usuario{         //classe usuario, serve para oriente todo o processo de c
 		}
 		return nota;
 	} 
+	double get_notaid(string id, string empresa){ 			 //função que pega a nota do funcionario 
+		vector <string> ex;
+		vector <string>::iterator it;
+		string aux;
+		double nota;
+		ifstream file(empresa.c_str());
+		while(!file.eof()){
+			getline(file,aux);
+			ex.push_back(aux);
+		}
+		for(int i=0;i<ex.size();i++){
+			if(procura(ex[i],id)==true){
+				stn(ex[i+1],nota);
+			}
+		}
+		return nota;
+	} 
 	void set_nota(string empresa, string nome, string novanota){  //funçao que muda a nota do usuario apos o mesmo resceber uma nova nota;
 		vector <string> ex;
 		vector <string>::iterator it;
@@ -297,6 +362,36 @@ class usuario{         //classe usuario, serve para oriente todo o processo de c
 		newfile.close();
 		
 	}
+	void set_notaid(string empresa, string id, string novanota){  //funçao que muda a nota do usuario apos o mesmo resceber uma nova nota;
+		vector <string> ex;
+		vector <string>::iterator it;
+		string aux, velhanota;
+		usuario c;
+		double velha;
+		double nova;
+		ifstream file(empresa.c_str());
+		while(!file.eof()){
+			getline(file,aux);
+			ex.push_back(aux);
+		}
+		file.close();
+		stn(novanota,nova);
+		velha = c.get_notaid(id ,empresa);
+		nova = ((nova+velha)/2);
+		nts(nova,novanota);
+		nts(velha,velhanota);
+		cout << "VELHA: " << velhanota << "|NOVA: " << novanota << endl;
+		for(int i =0;i<ex.size();i++){
+			if(procura(ex[i], id)==true){
+				ex[i+1] = novanota;
+			}
+		}
+		ofstream newfile(empresa.c_str());
+		for(it = ex.begin();it!=ex.end();it++){
+			newfile << *it << endl;
+		}
+		newfile.close();
+	}
 	void set_avalia(string avaliacao, string empresa, string nome){  //função usada para a avaliação do funcionario;
 		string nova = "" + empresa + "_AV" ;
 		usuario b;
@@ -304,9 +399,14 @@ class usuario{         //classe usuario, serve para oriente todo o processo de c
 		b.identifica(empresa,nome, id);
 		fstream file(nova.c_str(), ios::app);
 		file  << id << " |Avaliação -> " << avaliacao<< endl;
-		file.close();
-		
+		file.close();	
 	}
+	void set_avaliaid(string avaliacao, string empresa, string id){
+		string aux = "" + empresa + "_AV" ;
+		fstream file(aux.c_str(), ios::app);
+		file << id << " |Avaliação -> " << avaliacao << endl;
+		file.close();
+		}
 	void search(string nome, string empresa){  //aqui se busca a avaliação do funcionario, alem de sua respectiva nota;
 		vector <string> ex, x;
 		vector <string> plus;
@@ -352,6 +452,7 @@ class usuario{         //classe usuario, serve para oriente todo o processo de c
 			cout << "Nao há avaliações dessa empresa ainda" << endl;
 		}
 	}	
+
 	void all(string empresa){ //lista de todos os funcionario cadastrados em uma x empresa;
 		vector <string> x;
 		vector <string>::iterator it;
@@ -416,10 +517,10 @@ class usuario{         //classe usuario, serve para oriente todo o processo de c
 
 int main(){
 	usuario a; 
-	int op = 78,sai=0,op2=0,n=0, total;
+	int op = 78,sai=0,op2=0,n=0, total, escolha;
 	double media, media2;
 	string sen1;
-	string empresa, sel, vazia,novanota;
+	string empresa, sel, vazia,novanota, id1;
 	string in = "5.0"; //suporte para inicializar todas as notas quando criado o funcionario;
 	string senha = "admin";
 	vector<string> coletor;
@@ -475,6 +576,7 @@ int main(){
 					getline(cin,empresa);
 					}
 				}
+				system("cls");
 				cout << "BEM VINDO AO PAINEL DE CONTROLE DA " << empresa << endl;
 				cout << "1-> Adicionar Funcionarios"<< endl;
 				cout << "2-> Remover Funcionarios" << endl;
@@ -484,6 +586,7 @@ int main(){
 				cin >> op2;
 				switch(op2){
 					case 1:
+						system("cls");
 						cout << "Bem vindo, primeiramente digite o numero de funcionarios que deseja adicionar: ";
 						cin >> n;
 						for(int i=0;i<n;i++){
@@ -501,6 +604,7 @@ int main(){
 						}
 						break;
 					case 2:
+						system("cls");
 						cout << "Digite o numero de funcionario que deseja retirar: ";
 						cin >> n;
 						for(int i=0;i<n;i++){
@@ -513,20 +617,24 @@ int main(){
 						
 						break;
 					case 3:
+						system("cls");
 						rehabilitacao(empresa);
 						break;
 					case 4:
+						system("cls");
 						funcionario_do_mes(empresa);
 						break;
 					case 5:
+						system("cls");
 						a.bbe(empresa);
 						break;
 				}
 				break;
 			case 1:
+				system("cls");
 				cout << "Ola, temos cadastrados em nossos bancos as seguintes empresas: " <<endl;
 				lista();
-				cout << "Escolha a que o funcionario que deseja avaliar trabalha" << endl;
+				cout << "Escolha a empresa que o funcionario que deseja avaliar trabalha" << endl;
 				fflush(stdin);
 				getline(cin,empresa);
 				while(existe(empresa)!=true){
@@ -535,12 +643,18 @@ int main(){
 					getline(cin,empresa);
 				}
 				system("cls");
-				cout << "Agora digite o nome do funcionario: ";
+				cout << "Voce sabe qual é o:" << endl;
+				cout << "1. Nome completo do funcionario(a) " << endl;
+				cout << "2. id" << endl;
+				cin >> escolha;
+				if (escolha==1){
+				cout << "Digite o nome do funcionario: ";
 				fflush(stdin);
 				getline(cin,a.nome);
 				while(a.valido(empresa,a.nome)!= true){
 					cout << "Usuario nao encontrado, tente novamente: " << endl;
-					cin>>a.nome;
+					fflush(stdin);
+					getline(cin,a.nome);
 				}
 				cout << "Usuario encontrado, digite sua avaliação: " << endl;
 				fflush(stdin);
@@ -550,11 +664,32 @@ int main(){
 				cout << "Agora avalie o funcionario com uma nota de 0 a 5"<< endl;
 				cin>> novanota;
 				a.set_nota(empresa,a.nome,novanota);
+			}
+			system("cls");
+				if (escolha==2){
+					cout << "Digite a id do funcionario:" << endl;
+					fflush(stdin);
+					getline(cin, id1);
+					if (id_valida(empresa, id1)!=true){
+						cout << "A id não existe nos nossos bancos de dados, tente novamente: " << endl;
+						fflush(stdin);
+						getline(cin, id1);
+					}
+					cout << "Usuario encontrado, digite sua avaliação: " << endl;
+						fflush(stdin);
+						getline(cin, a.avalia);
+						a.set_avaliaid(a.avalia, empresa, id1);
+						system("cls");
+					cout << "Agora avalie o funcionario com uma nota de 0 a 5"<< endl;
+					cin>> novanota;	
+					a.set_notaid(empresa, id1, novanota);
+				}
 				break;
 			case 2:
+				system("cls");
 				cout << "Ola, temos cadastrados em nossos bancos as seguintes empresas: " <<endl;
 				lista();
-				cout << "Digite, primeiro o nome da empresa, em seguida o nome do funcionario que deseja porcurar: " << endl;
+				cout << "Digite o nome da empresa em que está o funcionario: " << endl;
 				fflush(stdin);
 				getline(cin,empresa);
 				while(existe(empresa)!=true){
@@ -562,11 +697,34 @@ int main(){
 					fflush(stdin);
 					getline(cin,empresa);
 				}
+				cout << "Voce quer procurar o funcionario pelo: " << endl;
+				cout << "1. Nome" << endl;
+				cout << "2. id" << endl;
+				cin >> escolha;
+				if (escolha != 1 && escolha !=2){
+					cout << "ops, escolha uma alternativa entre 1 e 2" << endl;
+					cin >> escolha;
+				}
+				if (escolha == 1){
+				system("cls");
+				cout << "Digite o nome completo do funcionario(a):" << endl;
 				fflush(stdin);
 				getline(cin,a.nome);
 				a.search(a.nome,empresa);
+			}
+				if (escolha == 2){
+					cout << "Digite a id do funcionario(a): " << endl;
+					fflush(stdin);
+					getline(cin, id1);
+					if (id_valida(empresa, id1) == true){
+						procuraid(empresa, id1);
+					}
+				
+					
+				}
 				break;
 			case 3:
+				system("cls");
 				cout << "Ola, temos cadastrados em nossos bancos as seguintes empresas: " <<endl;
 				lista();
 				cout << "Digite o nome da empresa" << endl;
@@ -575,6 +733,7 @@ int main(){
 				a.all(empresa);
 				break;
 			case 4:
+				system("cls");
 				cout << "Ola, temos cadastrados em nossos bancos as seguintes empresas: " <<endl;
 				lista();
 				cout << "Digite o nome da empresa que deseja obter informações: ";
@@ -586,9 +745,7 @@ int main(){
 					getline(cin,empresa);
 				}
 				a.dg(empresa, media);
-				cout << "O media total de acordo com as notas é de: " << media << endl;
-				cout << "O total de reclamçoes e de : " << total << endl;
-				cout << "O media de reclamaçoes por funcionario é de: " << media2 << endl; 
+				cout << "A media total de acordo com as notas é de: " << media << endl;
 				break;
 			case 5:
 				return 0;
@@ -596,3 +753,4 @@ int main(){
 		}
 	}
 }
+
